@@ -1,25 +1,29 @@
+import firebase from 'firebase/app';
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import AppHeader from './components/AppHeader';
+import TaskCardList from './components/TaskCardList';
+import Database from './libs/Database';
+
+// initialize app
+const config = {
+  apiKey: "AIzaSyAKNGlIwnxtRuCkn_80A6vdN_IgDJiS9Ak",
+  authDomain: "quota-system.firebaseapp.com",
+  databaseURL: "https://quota-system.firebaseio.com",
+  projectId: "quota-system",
+  storageBucket: "quota-system.appspot.com",
+  messagingSenderId: "372908174302"
+};
+firebase.initializeApp(config);
 
 class App extends Component {
   render() {
+    (new Database).getTasks();
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <AppHeader />
+        <TaskCardList />
       </div>
     );
   }
