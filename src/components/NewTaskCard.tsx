@@ -6,12 +6,12 @@ import CardActions from '@material-ui/core/CardActions';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import { Typography } from '@material-ui/core';
-import Database from '../libs/Database';
+import { TaskDefinition } from '../libs/Task';
 
 const ranges = ['yearly', 'monthly', 'weekly', 'daily'];
 
 interface Props {
-  refreshTasks: () => void;
+  addTask: (task: TaskDefinition) => void;
 }
 
 class NewTaskCard extends Component<Props> {
@@ -28,14 +28,11 @@ class NewTaskCard extends Component<Props> {
   };
 
   handleSubmit = (event : any) => {
-    let db = new Database;
-    db.addTask({
+    this.props.addTask({
       description: this.state.description,
       quota: this.state.quota,
       range: this.state.range,
     });
-
-    this.props.refreshTasks();
   }
 
   render() {

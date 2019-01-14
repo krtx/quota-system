@@ -10,27 +10,33 @@ class Database {
     this.db.settings({timestampsInSnapshots: true});
   }
 
-  addTask(task : TaskDefinition) {
-    this.db.collection("tasks").add({
+  addUser(user: firebase.User) {
+    this.db.collection("users").doc(user.uid).set({
+      email: user.email
+    });
+  }
+
+  addTask(userId: string, task: TaskDefinition) {
+    this.db.collection(`users/${userId}/tasks`).add({
       description: task.description,
       quota: task.quota,
       range: task.range,
     });
   }
 
-  deleteTask(id: string) {
-    this.db.collection("tasks").doc(id).delete();
+  deleteTask(userId: string, taskId: string) {
+    this.db.collection(`users/${userId}/tasks`).doc(taskId).delete();
   }
 
   // Get all tasks with counts
-  async getTasks() {
-    let querySnapshot = await this.db.collection('tasks').get();
+  async getTasks(userId: string) {
+    let querySnapshot = await this.db.collection(`users/${userId}/tasks`).get();
 
     let tasks: Task[] = [];
     for (let doc of querySnapshot.docs) {
       let data = doc.data();
 
-      // get count
+      // calculate done count
       let fromDate;
       let currentDate = new Date;
       switch (data.range) {
@@ -49,7 +55,7 @@ class Database {
           fromDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
           break;
       }
-      let snap = await this.db.collection(`tasks/${doc.id}/done`).where("timestamp", ">", fromDate).get();
+      let snap = await this.db.collection(`users/${userId}/tasks/${doc.id}/done`).where("timestamp", ">", fromDate).get();
 
       let task = {
         id: doc.id,
@@ -67,8 +73,8 @@ class Database {
     return tasks;
   }
 
-  incrementTaskCount(id: string) {
-    this.db.collection('tasks').doc(id).collection('done').add({
+  incrementTaskCount(userId: string, taskId: string) {
+    this.db.collection(`users/${userId}/tasks/${taskId}/done`).add({
       timestamp: new Date
     });
   }

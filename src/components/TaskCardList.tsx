@@ -2,15 +2,18 @@ import TaskCard from './TaskCard';
 import NewTaskCard from './NewTaskCard';
 import React, { Component } from 'react';
 import Database from '../libs/Database';
-import { Task } from '../libs/Task';
+import { Task, TaskDefinition } from '../libs/Task';
 
-interface Props { }
+interface Props {
+  user: firebase.User;
+}
+
 interface State {
   tasks: Task[]
 }
 
 class TaskCardList extends  Component<Props, State> {
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     
     this.state = {
@@ -20,26 +23,35 @@ class TaskCardList extends  Component<Props, State> {
 
   loadTasks() {
     let db = new Database;
-    db.getTasks().then((tasks) => this.setState({tasks: tasks}));
+    db.getTasks(this.props.user.uid).then((tasks) => this.setState({tasks: tasks}));
   }
 
-  deleteTask(id: string) {
+  addTask(task: TaskDefinition) {
+    // add new task
+    let db = new Database;
+    db.addTask(this.props.user.uid, task);
+
+    // reload tasks
+    this.loadTasks();
+  }
+
+  deleteTask(taskId: string) {
     if (!confirm('delete?')) {
       return;
     }
 
     // delete task
     let db = new Database;
-    db.deleteTask(id);
+    db.deleteTask(this.props.user.uid, taskId);
 
     // reload tasks
     this.loadTasks();
   }
 
-  incrementTaskCount(id: string) {
+  incrementTaskCount(taskId: string) {
     // increment task count
     let db = new Database;
-    db.incrementTaskCount(id);
+    db.incrementTaskCount(this.props.user.uid, taskId);
 
     // reload tasks
     this.loadTasks();
@@ -75,7 +87,7 @@ class TaskCardList extends  Component<Props, State> {
     return (
       <div>
         {tasks}
-        <NewTaskCard refreshTasks={this.loadTasks.bind(this)}/>
+        <NewTaskCard addTask={this.addTask.bind(this)} />
       </div>
     );
   }
